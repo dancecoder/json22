@@ -55,7 +55,7 @@ const State = {
     numberExpValue: 'numberExpValue',
 };
 
-export class JSSO {
+export class JSON22 {
 
     static #Stack = class {
         #array;
@@ -133,10 +133,10 @@ export class JSSO {
      * @param {string} text
      * @param {Record<string, { new (...args: any) }>} [context]
      * */
-    static parse(text, context= JSSO.#defaultContext) {
-        const it = JSSO.#iterate(text);
-        let stateStack = new JSSO.#Stack([State.value]);
-        let valueStack = new JSSO.#Stack();
+    static parse(text, context= JSON22.#defaultContext) {
+        const it = JSON22.#iterate(text);
+        let stateStack = new JSON22.#Stack([State.value]);
+        let valueStack = new JSON22.#Stack();
 
         for (const { c, i, code } of it) {
             switch (stateStack.top) {
@@ -507,7 +507,7 @@ export class JSSO {
     }
 
     static stringify(value) {
-        const vStack = new JSSO.#Stack([value]);
+        const vStack = new JSON22.#Stack([value]);
         const result = [];
         while (!vStack.empty) {
             const type = typeof vStack.top;
