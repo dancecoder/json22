@@ -1,7 +1,7 @@
 {
-  "name": "jsso",
-  "version": "1.0.0",
-  "description": "Java Script Serializable Objects tool",
+  "name": "JSON22",
+  "version": "0.0.1",
+  "description": "JSON superset with an ability to serialize/deserialize classes",
   "main": "index.js",
   "type": "module",
   "scripts": {
