@@ -1,0 +1,20 @@
+{
+  "name": "jsso",
+  "version": "1.0.0",
+  "description": "Java Script Serializable Objects tool",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "mocha"
+  },
+  "keywords": [
+    "json",
+    "serialization"
+  ],
+  "author": "Dmitry Dutikov",
+  "license": "ISC",
+  "devDependencies": {
+    "mocha": "^9.1.3",
+    "@types/node": "^16.11.7"
+  }
+}
