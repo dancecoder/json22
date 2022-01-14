@@ -37,11 +37,10 @@ const ESCAPE_MAP = {
 const DECIMAL_POINT = '.';
 const NUMBER_PLUS = '+';
 const NUMBER_MINUS = '-';
-const BIGINT_SUFFIX = 'n'; // TODO: implement parsing of bigints
+const BIGINT_SUFFIX = 'n';
 const LITERAL_NULL = 'null';
 const LITERAL_TRUE = 'true';
 const LITERAL_FALSE = 'false';
-const LITERAL_NaN = 'false'; // TODO: implement parsing of NaN
 
 const State = {
     value: 'value',
@@ -347,6 +346,12 @@ export class JSON22 {
                         case (code >= 0x61 && code <= 0x7a ? c : undefined): // lowercase ASCII letters
                             const top = valueStack.top;
                             top.push(c);
+                            if (top.length === 3 && top[0] === 'N' && top[1] === 'a' && top[2] === 'N') {
+                                valueStack.switchTopValue(NaN);
+                                stateStack.pop(State.literal);
+                                stateStack.pop(State.value);
+                                break;
+                            }
                             if (top.length === 4 && top[0] === 'n' && top[1] === 'u' && top[2] === 'l' && top[3] === 'l') {
                                 valueStack.switchTopValue(null);
                                 stateStack.pop(State.literal);
@@ -361,6 +366,18 @@ export class JSON22 {
                             }
                             if (top.length === 5 && top[0] === 'f' && top[1] === 'a' && top[2] === 'l' && top[3] === 's' && top[4] === 'e') {
                                 valueStack.switchTopValue(false);
+                                stateStack.pop(State.literal);
+                                stateStack.pop(State.value);
+                                break;
+                            }
+                            if (top.length === 8 && top[0] === 'I' && top[1] === 'n' && top[2] === 'f' && top[3] === 'i' && top[4] === 'n' && top[5] === 'i' && top[6] === 't' && top[7] === 'y') {
+                                valueStack.switchTopValue(Infinity);
+                                stateStack.pop(State.literal);
+                                stateStack.pop(State.value);
+                                break;
+                            }
+                            if (top.length === 9 && top[0] === '-' && top[1] === 'I' && top[2] === 'n' && top[3] === 'f' && top[4] === 'i' && top[5] === 'n' && top[6] === 'i' && top[7] === 't' && top[8] === 'y') {
+                                valueStack.switchTopValue(-Infinity);
                                 stateStack.pop(State.literal);
                                 stateStack.pop(State.value);
                                 break;
@@ -416,6 +433,16 @@ export class JSON22 {
                         case 'E':
                             valueStack.top.push(c);
                             stateStack.switch(State.number, State.numberExpSign);
+                            break;
+                        case 'I': // it may be negative Infinity
+                            valueStack.top.push(c);
+                            stateStack.switch(State.number, State.literal);
+                            break;
+                        case BIGINT_SUFFIX:
+                            const bi = valueStack.pop();
+                            valueStack.push(BigInt(bi.join('')));
+                            stateStack.pop(State.number);
+                            stateStack.pop(State.value);
                             break;
                         default:
                             const n = valueStack.pop();

@@ -4,23 +4,44 @@ import { suite, test } from 'mocha';
 
 suite('Literal values parsing tests', () => {
 
-    test('parsing root level true literal', () => {
+    test('true', () => {
         const l = true;
         const json = 'true';
         const parsed = JSON22.parse(json);
         assert.equal(parsed, l);
     });
 
-    test('parsing root level false literal', () => {
+    test('false', () => {
         const l = false;
         const json = 'false';
         const parsed = JSON22.parse(json);
         assert.equal(parsed, l);
     });
 
-    test('parsing root level null literal', () => {
+    test('null', () => {
         const l = null;
         const json = 'null';
+        const parsed = JSON22.parse(json);
+        assert.equal(parsed, l);
+    });
+
+    test('NaN', () => {
+        const l = NaN;
+        const json = 'NaN';
+        const parsed = JSON22.parse(json);
+        assert.equal(parsed, l);
+    });
+
+    test('Infinity', () => {
+        const l = Infinity;
+        const json = 'Infinity';
+        const parsed = JSON22.parse(json);
+        assert.equal(parsed, l);
+    });
+
+    test('-Infinity', () => {
+        const l = -Infinity;
+        const json = '-Infinity';
         const parsed = JSON22.parse(json);
         assert.equal(parsed, l);
     });

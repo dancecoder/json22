@@ -4,91 +4,22 @@ import { suite, test } from 'mocha';
 
 suite('Stringify method tests', function () {
 
-    test('string', () => {
-        const js = 'test';
-        const json = '"test"';
-        const string = JSON22.stringify(js);
-        assert.equal(string, json);
+    test('allowed types', () => {
+        const values = ['string', true, false, null, 42, 42n, NaN, Infinity, -Infinity];
+        const jsons = ['"string"', 'true', 'false', 'null', '42', '42n', 'NaN', 'Infinity', '-Infinity'];
+        for (let i = 0, max = values.length; i < max; i++) {
+            const string = JSON22.stringify(values[i]);
+            assert.equal(string, jsons[i]);
+        }
     });
 
-    test('boolean true', () => {
-        const js = true;
-        const json = 'true';
-        const string = JSON22.stringify(js);
-        assert.equal(string, json);
+    test('disallowed types', () => {
+        const values = [function () {}, async function () {}, () => {}, async () => {}, Symbol(), undefined];
+        for (let i = 0, max = values.length; i < max; i++) {
+            const string = JSON22.stringify(values[i]);
+            assert.equal(string, undefined);
+        }
     });
-
-    test('boolean false', () => {
-        const js = false;
-        const json = 'false';
-        const string = JSON22.stringify(js);
-        assert.equal(string, json);
-    });
-
-    test('null value', () => {
-        const js = null;
-        const json = 'null';
-        const string = JSON22.stringify(js);
-        assert.equal(string, json);
-    });
-
-    test('number value', () => {
-        const js = 42;
-        const json = '42';
-        const string = JSON22.stringify(js);
-        assert.equal(string, json);
-    });
-
-    test('bigint value', () => {
-        const js = 42n;
-        const json = '42n';
-        const string = JSON22.stringify(js);
-        assert.equal(string, json);
-    });
-
-
-    test('function value', () => {
-        const js = function () {};
-        const json = undefined;
-        const string = JSON22.stringify(js);
-        assert.equal(string, json);
-    });
-
-    test('async function value', () => {
-        const js = async function () {};
-        const json = undefined;
-        const string = JSON22.stringify(js);
-        assert.equal(string, json);
-    });
-
-    test('arrow function value', () => {
-        const js = () => {};
-        const json = undefined;
-        const string = JSON22.stringify(js);
-        assert.equal(string, json);
-    });
-
-    test('async arrow function value', () => {
-        const js = async () => {};
-        const json = undefined;
-        const string = JSON22.stringify(js);
-        assert.equal(string, json);
-    });
-
-    test('symbol value', () => {
-        const js = Symbol();
-        const json = undefined;
-        const string = JSON22.stringify(js);
-        assert.equal(string, json);
-    });
-
-    test('undefined value', () => {
-        const js = undefined;
-        const json = undefined;
-        const string = JSON22.stringify(js);
-        assert.equal(string, json);
-    });
-
 
     test('empty object', () => {
         const js = {};
