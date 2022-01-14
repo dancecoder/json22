@@ -20,7 +20,7 @@ const END_ARGUMENTS = ')';
 const NAME_SEPARATOR  = ':';
 const VALUE_SEPARATOR = ',';
 const QUOTATION_MARK = '"';
-const HEXADECIMALS = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', 'a', 'b', 'c', 'd', 'e', 'f'];
+const HEXADECIMALS = ['0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F','a','b','c','d','e','f'];
 const ESCAPE_CHAR = '\\';
 const ESCAPE_SHORTENS = [QUOTATION_MARK, ESCAPE_CHAR, '/', 'b', 'f', 'n', 'r', 't'];
 const ESCAPE_MAP = {
@@ -37,6 +37,11 @@ const ESCAPE_MAP = {
 const DECIMAL_POINT = '.';
 const NUMBER_PLUS = '+';
 const NUMBER_MINUS = '-';
+const BIGINT_SUFFIX = 'n'; // TODO: implement parsing of bigints
+const LITERAL_NULL = 'null';
+const LITERAL_TRUE = 'true';
+const LITERAL_FALSE = 'false';
+const LITERAL_NaN = 'false'; // TODO: implement parsing of NaN
 
 const State = {
     value: 'value',
@@ -59,15 +64,25 @@ export class JSON22 {
 
     static #Stack = class {
         #array;
+        #crCheck = false;
 
         /**
          * @param {any[]} [initial=[]]
+         * @param {boolean} [checkForCircularReferences = false]
          */
-        constructor(initial) {
+        constructor(initial, checkForCircularReferences = false) {
             this.#array = initial ?? [];
+            this.#crCheck = checkForCircularReferences;
         }
 
         push(value) {
+            if (this.#crCheck && typeof value === 'object' && value !== null) {
+                for (const elm of this.#array) {
+                    if (elm === value) {
+                        throw new Error('Circular reference found');
+                    }
+                }
+            }
             this.#array.push(value);
         }
 
@@ -507,30 +522,120 @@ export class JSON22 {
     }
 
     static stringify(value) {
-        const vStack = new JSON22.#Stack([value]);
+        const vStack = new JSON22.#Stack([value], true);
         const result = [];
         while (!vStack.empty) {
             const type = typeof vStack.top;
             switch (type) {
                 case "function":
-                    break;
-                case "bigint":
-                    break;
-                case "boolean":
-                    break;
-                case "string":
+                case "undefined":
+                case "symbol":
+                    vStack.pop();
                     break;
                 case "number":
+                    result.push(String(vStack.top));
+                    vStack.pop();
                     break;
-                case "undefined":
+                case "bigint":
+                    result.push(String(vStack.top));
+                    result.push(BIGINT_SUFFIX);
+                    vStack.pop();
                     break;
-                case "symbol":
+                case "boolean":
+                    result.push(vStack.top ? LITERAL_TRUE : LITERAL_FALSE);
+                    vStack.pop();
+                    break;
+                case "string":
+                    result.push(QUOTATION_MARK);
+                    result.push(vStack.top);
+                    result.push(QUOTATION_MARK);
+                    vStack.pop();
                     break;
                 case "object":
+                    if (vStack.top === null) {
+                        result.push(LITERAL_NULL);
+                        vStack.pop();
+                    } else if (vStack.top.objectEntriesItem) {
+                        if (vStack.top.done) {
+                            vStack.pop();
+                            result.push(VALUE_SEPARATOR);
+                            continue;
+                        }
+                        switch (typeof vStack.top[1]) {
+                            case "function":
+                            case "symbol":
+                            case "undefined":
+                                vStack.pop();
+                                continue;
+                            default:
+                                result.push(QUOTATION_MARK);
+                                result.push(vStack.top[0]);
+                                result.push(QUOTATION_MARK);
+                                result.push(NAME_SEPARATOR);
+                                vStack.top.done = true;
+                                vStack.push(vStack.top[1]);
+                                break;
+                        }
+                    } else if (vStack.top.objectEntries) {
+                        if (vStack.top.next === vStack.top.length) {
+                            if (result[result.length-1] === VALUE_SEPARATOR) {
+                                result.pop();
+                            }
+                            result.push(END_OBJECT);
+                            vStack.pop(); // objectEntries
+                            vStack.pop(); // object
+                            continue;
+                        }
+                        const next = vStack.top.next;
+                        vStack.top.next++;
+                        vStack.top[next].objectEntriesItem = true;
+                        vStack.push(vStack.top[next]);
+                    } else if (vStack.top.arrayItem) {
+                        if (vStack.top.index > -1) {
+                            result.push(VALUE_SEPARATOR);
+                        }
+                        vStack.top.index++;
+                        if (vStack.top.array.length === vStack.top.index) {
+                            if (result[result.length-1] === VALUE_SEPARATOR) {
+                                result.pop();
+                            }
+                            result.push(END_ARRAY);
+                            vStack.pop(); // arrayItem
+                            vStack.pop(); // array
+
+                        } else {
+                            switch (typeof vStack.top.array[vStack.top.index]) {
+                                case "function":
+                                case "symbol":
+                                case "undefined":
+                                    // NOTE:  RFS8259 say nothing about serialisation of disallowed types nested
+                                    //        at an array, so we follow the JSON.stringify behavior here as it make sense
+                                    //        to keep length of an array
+                                    vStack.push(null);
+                                    break;
+                                default:
+                                    vStack.push(vStack.top.array[vStack.top.index]);
+                                    break;
+                            }
+                        }
+                    } else if (Array.isArray(vStack.top)) {
+                        result.push(BEGIN_ARRAY);
+                        vStack.push({ arrayItem: true, index: -1, array: vStack.top });
+                    } else {
+                        result.push(BEGIN_OBJECT);
+                        const entries = Object.entries(vStack.top);
+                        entries.objectEntries = true;
+                        entries.next = 0;
+                        vStack.push(entries);
+                    }
                     break;
                 default:
                     throw new Error(`Unexpected type ${type}`);
             }
         }
+        if (result.length === 0) {
+            return undefined;
+        }
+        return result.join('');
     }
 }
