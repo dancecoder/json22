@@ -208,4 +208,13 @@ suite('Stringify method tests', function () {
         assert.equal(string, json);
     });
 
+    test('constructor - too much arguments check', () => {
+        const Ctor = function(a, b) {
+            this.value = [a, b, 3, 4];
+            this.valueOf = () => this.value;
+        };
+        const js = new Ctor(1, 2);
+        assert.throws(() => JSON22.parse(js));
+    });
+
 });
