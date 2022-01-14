@@ -617,6 +617,30 @@ export class JSON22 {
                         vStack.top.next++;
                         vStack.top[next].objectEntriesItem = true;
                         vStack.push(vStack.top[next]);
+                    } else if (vStack.top.constructorArguments) {
+                        if (vStack.top.index > -1) {
+                            result.push(VALUE_SEPARATOR);
+                        }
+                        vStack.top.index++;
+                        if (vStack.top.args.length === vStack.top.index) {
+                            if (result[result.length-1] === VALUE_SEPARATOR) {
+                                result.pop();
+                            }
+                            result.push(END_ARGUMENTS);
+                            vStack.pop(); // constructorArguments
+                            vStack.pop(); // object
+                        } else {
+                            switch (typeof vStack.top.args[vStack.top.index]) {
+                                case "function":
+                                case "symbol":
+                                case "undefined":
+                                    throw new Error('Unsupported constructor argument type');
+                                default:
+                                    vStack.push(vStack.top.args[vStack.top.index]);
+                                    break;
+                            }
+                        }
+
                     } else if (vStack.top.arrayItem) {
                         if (vStack.top.index > -1) {
                             result.push(VALUE_SEPARATOR);
@@ -649,6 +673,22 @@ export class JSON22 {
                         result.push(BEGIN_ARRAY);
                         vStack.push({ arrayItem: true, index: -1, array: vStack.top });
                     } else {
+                        const objectValue = vStack.top.valueOf()
+                        if (objectValue !== vStack.top) {
+                            const args = [].concat(objectValue);
+                            if (args.length > vStack.top.constructor.length) {
+                                throw Error('Arguments lengths  greater then constructor length');
+                            }
+                            result.push(vStack.top.constructor.name);
+                            result.push(BEGIN_ARGUMENTS);
+                            vStack.push({ constructorArguments: true, index: -1, args });
+                            break;
+                        }
+                        if (typeof vStack.top.toJSON === 'function') {
+                            result.push(vStack.top.toJSON());
+                            vStack.pop();
+                            break;
+                        }
                         result.push(BEGIN_OBJECT);
                         const entries = Object.entries(vStack.top);
                         entries.objectEntries = true;

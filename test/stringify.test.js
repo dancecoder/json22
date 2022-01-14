@@ -86,6 +86,17 @@ suite('Stringify method tests', function () {
         assert.equal(string, json);
     });
 
+    test('object - toJSON method', () => {
+        const Ctor = function(a, b) {
+            this.value = [a, b];
+            this.toJSON = () => '"test"'
+        };
+        const js = new Ctor(1, 2);
+        const json = '"test"';
+        const string = JSON22.stringify(js);
+        assert.equal(string, json);
+    });
+
 
     test('empty array', () => {
         const js = [];
@@ -163,6 +174,36 @@ suite('Stringify method tests', function () {
             '}' +
         '}';
 
+        const string = JSON22.stringify(js);
+        assert.equal(string, json);
+    });
+
+    test('constructor - one argument', () => {
+        const js = new Date();
+        const json = `Date(${js.valueOf()})`;
+        const string = JSON22.stringify(js);
+        assert.equal(string, json);
+    });
+
+    test('constructor - few argument', () => {
+        const Ctor = function(a, b) {
+            this.value = [a, b];
+            this.valueOf = () => this.value;
+        };
+        const js = new Ctor(1, 2);
+        const json = `Ctor(${js.valueOf()})`;
+        const string = JSON22.stringify(js);
+        assert.equal(string, json);
+    });
+
+    test('constructor - constructor as argument', () => {
+        const date = new Date();
+        const Ctor = function(a, b) {
+            this.value = [a, b];
+            this.valueOf = () => this.value;
+        };
+        const js = new Ctor(1, date);
+        const json = `Ctor(1,Date(${date.valueOf()}))`;
         const string = JSON22.stringify(js);
         assert.equal(string, json);
     });
