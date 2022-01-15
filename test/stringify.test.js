@@ -214,7 +214,7 @@ suite('Stringify method tests', function () {
             this.valueOf = () => this.value;
         };
         const js = new Ctor(1, 2);
-        assert.throws(() => JSON22.parse(js));
+        assert.throws(() => JSON22.stringify(js));
     });
 
 });
