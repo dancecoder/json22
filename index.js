@@ -554,7 +554,12 @@ export class JSON22 {
 
     }
 
-    static stringify(value) {
+    /**
+     * @param {any} value
+     * @param {{}} [options]
+     * @return {string}
+     * */
+    static stringify(value, options) {
         const vStack = new JSON22.#Stack([value], true);
         const result = [];
         while (!vStack.empty) {
