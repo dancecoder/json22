@@ -9,7 +9,13 @@
   },
   "keywords": [
     "json",
-    "serialization"
+    "serialization",
+    "NaN",
+    "Infinity",
+    "BigInt",
+    "types",
+    "valueOf",
+    "toJSON"
   ],
   "author": "Dmitry Dutikov",
   "--license": "ISC",
