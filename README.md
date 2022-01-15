@@ -8,7 +8,7 @@ const value = {
     name: "Femistoclus",
     amount: 3873133n,
     debt: NaN,
-    date: new Date('2022-01-01'),
+    date: new Date('2022-01-07'),
 };
 const string = JSON22.stringify(value);
 console.log(string);
