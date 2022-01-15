@@ -145,9 +145,15 @@ export class JSON22 {
 
     /**
      * @param {string} text
-     * @param {Record<string, { new (...args: any) }>} [context]
+     * @param {{
+     *     context?: Record<string, { new (...args: any) }>;
+     * }} [options]
      * */
-    static parse(text, context= JSON22.#defaultContext) {
+    static parse(text, options) {
+        const context = {};
+        Object.assign(context, this.#defaultContext);
+        Object.assign(context, options?.context ?? {});
+
         const it = JSON22.#iterate(text);
         let stateStack = new JSON22.#Stack([State.value]);
         let valueStack = new JSON22.#Stack();
