@@ -1,7 +1,7 @@
 {
-  "name": "JSON22",
-  "version": "0.0.1",
-  "description": "JSON superset with an ability to serialize/deserialize classes",
+  "name": "json22",
+  "version": "0.0.2",
+  "description": "JSON superset with an ability to deal with classes and extended support for number values",
   "main": "index.js",
   "type": "module",
   "scripts": {
