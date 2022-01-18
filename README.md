@@ -1,5 +1,6 @@
 # JSON22 - JSON with types
-The JSON22 is a superset of [JSON](https://tools.ietf.org/html/rfc7159) with an ability to serialize/deserialize classes and extended support for number variables
+The JSON22 is a superset of [JSON](https://tools.ietf.org/html/rfc7159) with an ability to serialize/deserialize 
+classes and extended support for number variables.
 
 ## TL;DR
 ### To there ...
@@ -37,15 +38,18 @@ console.log(typeof value.debt, isNaN(value.debt)); // => number true
 ## Motivation
 JSON format is good enough for everyday usage. There is some libraries trying to introduce syntax to make JSON closer
 to modern JavaScript, some libraries trying to introduce functions serialization. All that is not important and do not
-required for everyday usage. However, there is one think annoing me always - date values. 
+required for everyday usage. However, there is one thing annoing me always - date values. 
 
-We are serializing dates a lot and each time we parse it back we get a string. As a result we have to deal with the Date 
-constructor manually each time. Even we are no need date as object we will have to format it out to make more user friendly. 
-Otherwords we should care about dates additionally.
+We are serializing dates a lot and each time we parse it back we are getting a string. As a result we have to deal with 
+the Date constructor manually each time. Even if we are no need date as an object, date formatter will have to make date 
+object in order to make user friendly text representation. Otherwords we are forced to care about dates additionally.
+It produces bulky solutions or tons of inline type conversions.
 
 But I'm lazy developer, I'll do everything to get rid of any additional careness.
 
 ## API
+Note: JSON22 cannot be used as drop in JSON object replacement due to `parse` and `stringify` methods 
+arguments incompatibility. But you may not be worried in case you are using first arguments only.
 ```typescript
 class JSON22 {
     static parse(text: string, options?: Json22ParseOptions): any;
@@ -87,7 +91,7 @@ JSON22.parse('{ "bigint": 123n }'); // => { bigint: 123n }
 
 ### Trailing commas
 It was not planned, but parser implementation work well with trailing commas. 
-We are not going to complicate parser code to avoid it. It looks useful.
+There is no sense to complicate the parser code to avoid it. It looks useful.
 
 ```javascript
 JSON.parse('[1, 2, 3, ]'); // => Uncaught SyntaxError: Unexpected token ] in JSON at position 9
@@ -109,10 +113,10 @@ JSON22.stringify(date); // => Date(1641513600000)
 const date = JSON22.parse('Date(1641513600000)');
 console.log(typeof date, date instanceof Date); // => object true 
 ```
-This behavior is based on the `valueOf` method  which is defined at the Object class. 
+This behavior is based on the `valueOf` method which is defined at the Object class. 
 In case JSON22 find the `valueOf` method return a value which is not equal of the object itself then it will produce
 constructor literal. The `valueOf` of the Date class return numeric date representation. 
-It you'll call Date constructor with that value date will be sort of 'restored'.
+If you'll call the Date constructor with that value then date will be sort of 'restored'.
 
 #### Custom valueOf implementation
 To match this behavior you may implement you own `valueOf` method at you custom class.
@@ -120,11 +124,9 @@ To match this behavior you may implement you own `valueOf` method at you custom 
 Let's define a model class for demonstration
 ```javascript
 class TypedModel {
-    a;
-    b;
     constructor(data) {
-        this.a = data.a;
-        this.b = data.b;
+        this.a = data?.a;
+        this.b = data?.b;
     }
     valueOf() {
         return { a: this.a, b: this.b };
@@ -159,7 +161,7 @@ console.log(value instanceof TypedModel); // => true
 ```
 
 #### The `valueOf` method priority
-The `JSON22` support for `toJSON` method of an object as well as `JSON`. In some cases an object may have both `valueOf` 
-and `toJSON` methods. Typical example is the Date class. The `JSON22` at first is a solution to serialize/deserialize 
-date values, so `valueOf` have higher priority then `toJSON`. This is also true for any object implementing `valueOf` 
+The JSON22 support for `toJSON` method of an object as well as JSON. In some cases an object may have both `valueOf` 
+and `toJSON` methods. Typical example is the Date class. The JSON22 at first is a solution to serialize/deserialize 
+date values, so __`valueOf` have higher priority over `toJSON`__. This is also true for any object implementing `valueOf` 
 and `toJSON` both. 
