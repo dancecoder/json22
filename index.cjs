@@ -83,7 +83,7 @@ const State = {
     numberExpValue: 'numberExpValue',
 };
 
-module.exports.JSON22 = class {
+class JSON22 {
 
     static #Stack = class {
         #array;
@@ -741,3 +741,5 @@ module.exports.JSON22 = class {
         return result.join('');
     }
 }
+
+module.exports = { JSON22 };
