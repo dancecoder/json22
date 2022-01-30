@@ -36,13 +36,13 @@ console.log(typeof value.amount); // => bigint
 console.log(typeof value.debt, isNaN(value.debt)); // => number true
 ```
 ## Motivation
-JSON format is good enough for everyday usage. There is some libraries trying to introduce syntax to make JSON closer
-to modern JavaScript, some libraries trying to introduce functions serialization. All that is not important and do not
-required for everyday usage. However, there is one thing annoing me always - date values. 
+JSON format is good enough for everyday usage. There are some libraries trying to introduce syntax to make JSON closer
+to modern JavaScript, some libraries trying to introduce functions serialization. All that is not important and is not
+required for everyday usage. However, there is one thing annoying me always - date values. 
 
 We are serializing dates a lot and each time we parse it back we are getting a string. As a result we have to deal with 
 the Date constructor manually each time. Even if we are no need date as an object, date formatter will have to make date 
-object in order to make user friendly text representation. Otherwords we are forced to care about dates additionally.
+object in order to make user-friendly text representation. Otherwords we are forced to care about dates additionally.
 It produces bulky solutions or tons of inline type conversions.
 
 But I'm lazy developer, I'll do everything to get rid of any additional careness.
@@ -70,7 +70,7 @@ interface Json22StringifyOptions {
 
 ### Numbers
 
-With JSON22 you can use `NaN`, `Infinity`, `-Infinity` values. It mean also this values will be stringified well 
+With JSON22 you can use `NaN`, `Infinity`, `-Infinity` values. It means also this values will be stringified well 
 in case it nested at an array or an object.
 ```javascript
 JSON.stringify([42, NaN, Infinity, -Infinity]); // => [42, null, null, null] 

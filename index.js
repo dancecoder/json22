@@ -85,6 +85,8 @@ const State = {
 
 export class JSON22 {
 
+    static mimeType = 'application/x.json22';
+
     static #Stack = class {
         #array;
         #crCheck = false;
