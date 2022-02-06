@@ -52,7 +52,7 @@ Note: JSON22 cannot be used as drop in JSON object replacement due to `parse` an
 arguments incompatibility. But you may not be worried in case you are using first arguments only.
 ```typescript
 class JSON22 {
-    static parse(text: string, options?: Json22ParseOptions): any;
+    static parse<T>(text: string, options?: Json22ParseOptions): T;
     static stringify(value: any, options?: Json22StringifyOptions): string;
 }
 
