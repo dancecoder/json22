@@ -35,20 +35,64 @@ console.log(typeof value.date, value.date.constructor.name); // => object Date
 console.log(typeof value.amount); // => bigint
 console.log(typeof value.debt, isNaN(value.debt)); // => number true
 ```
-## Motivation
-JSON format is good enough for everyday usage. There are some libraries trying to introduce syntax to make JSON closer
-to modern JavaScript, some libraries trying to introduce functions serialization. All that is not important and is not
-required for everyday usage. However, there is one thing annoying me always - date values. 
 
-We are serializing dates a lot and each time we parse it back we are getting a string. As a result we have to deal with 
-the Date constructor manually each time. Even if we are no need date as an object, date formatter will have to make date 
-object in order to make user-friendly text representation. Otherwords we are forced to care about dates additionally.
-It produces bulky solutions or tons of inline type conversions.
+## Features
+* Can parse standard `JSON` format
+* Support for `BigInt` values
+* Support for `NaN` values
+* Support for `Infinity`/`-Infinity` values
+* Support for typed serialization/deserialization, work with `Date` class out of the box
+* Allow using trailing commas
+* Zero-dependency npm-package
+* Both CJS/ESM modules support
 
-But I'm lazy developer, I'll do everything to get rid of any additional careness.
+## Installation
+```shell
+npm install json22
+```
+In your code
+```javascript
+import { JSON22 } from 'json22'
+
+const data = { date: new Date() };
+const s = JSON22.stringify(data);
+```
+
+For old-fashioned applications
+```javascript
+const { JSON22 } = require('json22'); 
+
+const data = { date: new Date() };
+const s = JSON22.stringify(data);
+```
+
+## Integration
+### Using with Express
+There is library [json22-express](https://github.com/dancecoder/json22-express) providing JSON22 support for expressjs applications
+```javascript
+import express from 'express'; 
+import { json22express } from 'json22-express'
+
+const app = express();
+app.use(json22express());
+
+app.get('/date', (req, res, next) => {
+    res.status(200).json22({ date: new Date() });
+    next();
+});
+```
+### Using with Axios
+There is library [json22-axios](https://github.com/dancecoder/json22-axios) providing JSON22 support for client applications
+```javascript
+import axios from 'axios';
+import { Json22RequestInterceptor } from 'json22-axios';
+
+axios.interceptors.request.use(Json22RequestInterceptor());
+// interceptor allow you to send and receive JSON22
+```
 
 ## API
-Note: JSON22 cannot be used as drop in JSON object replacement due to `parse` and `stringify` methods 
+Note: JSON22 cannot be used as drop in JSON object replacement due to `parse` and `stringify` methods
 arguments incompatibility. But you may not be worried in case you are using first arguments only.
 ```typescript
 class JSON22 {
@@ -165,3 +209,15 @@ The JSON22 support for `toJSON` method of an object as well as JSON. In some cas
 and `toJSON` methods. Typical example is the Date class. The JSON22 at first is a solution to serialize/deserialize 
 date values, so __`valueOf` have higher priority over `toJSON`__. This is also true for any object implementing `valueOf` 
 and `toJSON` both. 
+
+## Motivation
+JSON format is good enough for everyday usage. There are some libraries trying to introduce syntax to make JSON closer
+to modern JavaScript, some libraries trying to introduce functions serialization. All that is not important and is not
+required for everyday usage. However, there is one thing annoying me always - date values.
+
+We are serializing dates a lot and each time we parse it back we are getting a string. As a result we have to deal with
+the Date constructor manually each time. Even if we are no need date as an object, date formatter will have to make date
+object in order to make user-friendly text representation. Otherwords we are forced to care about dates additionally.
+It produces bulky solutions or tons of inline type conversions.
+
+But I'm lazy developer, I'll do everything to get rid of any additional careness.

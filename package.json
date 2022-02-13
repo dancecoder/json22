@@ -1,8 +1,11 @@
 {
   "name": "json22",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "JSON superset with an ability to deal with classes and extended support for number values",
-  "author": "Dmitry Dutikov",
+  "author": {
+    "email": "dancecoder@gmail.com",
+    "name": "Dmitry Dutikov"
+  },
   "license": "MIT",
   "keywords": [
     "json",
@@ -12,7 +15,8 @@
     "BigInt",
     "types",
     "valueOf",
-    "toJSON"
+    "toJSON",
+    "json22"
   ],
   "repository": "github:dancecoder/json22",
   "main": "index.js",
