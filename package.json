@@ -1,6 +1,6 @@
 {
   "name": "json22",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "JSON superset with an ability to deal with classes and extended support for number values",
   "author": {
     "email": "dancecoder@gmail.com",

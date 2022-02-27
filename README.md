@@ -88,7 +88,16 @@ import axios from 'axios';
 import { Json22RequestInterceptor } from 'json22-axios';
 
 axios.interceptors.request.use(Json22RequestInterceptor());
-// interceptor allow you to send and receive JSON22
+
+async function geServerDate() {
+  try {
+      const resp = await axios.get('/date');
+      return resp.data.date;
+  } catch (e) {
+    console.error(e);
+  }
+  return null;
+}
 ```
 
 ## API
@@ -96,6 +105,7 @@ Note: JSON22 cannot be used as drop in JSON object replacement due to `parse` an
 arguments incompatibility. But you may not be worried in case you are using first arguments only.
 ```typescript
 class JSON22 {
+    static readonly mimeType: string;
     static parse<T>(text: string, options?: Json22ParseOptions): T;
     static stringify(value: any, options?: Json22StringifyOptions): string;
 }
@@ -150,7 +160,7 @@ This is the most significant addition. It's allow you to serialize and deseriali
 Out of the box it works well with date values.
 ```javascript
 const date = new Date('2022-01-07');
-JSON.stringify(date); // => '"2022-01-07T00:00:00.000Z"'
+JSON.stringify(date); // => "2022-01-07T00:00:00.000Z"
 JSON22.stringify(date); // => Date(1641513600000)
 ```
 ```javascript

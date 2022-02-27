@@ -46,6 +46,13 @@ suite('Object values parsing tests', () => {
         assert.deepEqual(parsed, o);
     });
 
+    test('parsing object with escaped chars in a key', () => {
+        const o = {"\u0000":1234,"\u0001":"abcd","\u0002":true,"\u0003":null,"last":false};
+        const json = '{"\\u0000":1234,"\\u0001":"abcd","\\u0002":true,"\\u0003":null,"last":false}';
+        const parsed = JSON22.parse(json);
+        assert.deepEqual(parsed, o);
+    });
+
     test('check for incorrect char after entry value', () => {
         assert.throws(() => JSON22.parse('{ "k": "v" Z }'));
     });

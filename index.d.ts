@@ -1,4 +1,5 @@
 export declare class JSON22 {
+    static readonly mimeType: string;
     static parse<T>(text: string, options?: Json22ParseOptions): T;
     static stringify(value: any, options?: Json22StringifyOptions): string;
 }

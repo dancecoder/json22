@@ -73,6 +73,7 @@ const State = {
     objectMemberValue: 'objectMemberValue',
     string: 'string',
     escape: 'escape',
+    escapeUnicode: 'escapeUnicode',
     array: 'array',
     arrayItem: 'arrayItem',
     literal: 'literal',
@@ -192,7 +193,7 @@ class JSON22 {
                             // ignore
                             break;
                         case QUOTATION_MARK:
-                            valueStack.push([]);
+                            valueStack.push([{ start: i, end: i, type: 'string' }]);
                             stateStack.push(State.string);
                             break;
                         case BEGIN_OBJECT:
@@ -250,17 +251,21 @@ class JSON22 {
                         case (code < 0x20 ? c : undefined):
                             throw new Error(`Character ${c} at position ${i} is not allowed, try to escape it`);
                         case ESCAPE_CHAR:
+                            const region = valueStack.top.pop();
+                            valueStack.top.push(text.slice(region.start+1, region.end+1));
                             stateStack.push(State.escape);
                             break;
                         case QUOTATION_MARK:
-                            const chars = valueStack.pop();
-                            const value = chars.join('');
+                            const r = valueStack.top.pop();
+                            valueStack.top.push(text.slice(r.start+1, r.end+1));
+                            const substrings = valueStack.pop();
+                            const value = substrings.join('');
                             valueStack.push(value);
                             stateStack.pop(State.string);
                             stateStack.pop(); // out of value or objectMemberKey
                             break;
                         default:
-                            valueStack.top.push(c);
+                            valueStack.top[valueStack.top.length-1].end = i;
                             break;
                     }
                     break;
@@ -268,26 +273,33 @@ class JSON22 {
                     switch (c) {
                         case (ESCAPE_SHORTENS.indexOf(c) > -1 ? c : undefined):
                             valueStack.top.push(ESCAPE_MAP[c]);
+                            valueStack.top.push({ start: i, end: i, type: 'string' });
                             stateStack.pop();
                             break;
                         case 'u': // unicode escape like \u0020
-                            valueStack.push(['unicode']);
-                            break;
-                        case (HEXADECIMALS.indexOf(c) > -1 ? c : undefined):
-                            if (valueStack.top[0] === 'unicode') {
-                                if (valueStack.top.length === 5) {
-                                    const top = valueStack.pop();
-                                    top.shift();
-                                    const code = parseInt(top.join(''), 16);
-                                    valueStack.top.push(String.fromCharCode(code));
-                                    stateStack.pop();
-                                }
-                            } else {
-                                throw new Error(`Unexpected character ${c} at ${i}, unicode escape sequence expected`);
-                            }
+                            valueStack.top.push({ start: i, end: i, type: 'escapeUnicode' });
+                            stateStack.switch(State.escape, State.escapeUnicode);
                             break;
                         default:
                             throw new Error(`Unexpected character ${c} at ${i}, escape sequence expected`);
+                    }
+                    break;
+                case State.escapeUnicode:
+                    switch(c) {
+                        case (HEXADECIMALS.indexOf(c) > -1 ? c : undefined):
+                            const region = valueStack.top[valueStack.top.length-1];
+                            region.end = i;
+                            if (region.end - region.start === 4) {
+                                valueStack.top.pop();
+                                const codeText = text.slice(region.start+1, region.end+1);
+                                const code = parseInt(codeText, 16);
+                                valueStack.top.push(String.fromCharCode(code));
+                                valueStack.top.push({ start: i, end: i, type: 'string' });
+                                stateStack.pop(State.escapeUnicode);
+                            }
+                            break;
+                        default:
+                            throw new Error(`Unexpected character ${c} at ${i}, unicode escape sequence expected`);
                     }
                     break;
                 case State.object:
@@ -309,7 +321,7 @@ class JSON22 {
                             // ignore
                             break;
                         case QUOTATION_MARK:
-                            valueStack.push([]);
+                            valueStack.push([{ start: i, end: i, type: 'string' }]);
                             stateStack.push(State.string);
                             break;
                         case END_OBJECT:
